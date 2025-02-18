@@ -75,7 +75,7 @@ export default function OrganizationsPage() {
                 <p className="text-sm text-gray-500">{org.description}</p>
                 <p className="text-sm text-gray-500">{org.address}</p>
                 <p className="font-medium">
-                  Monthly Fee: ${org.monthlyFee.toFixed(2)}
+                  Monthly Fee: ${Number(org?.monthlyFee || 0).toFixed(2)}
                 </p>
               </div>
             </CardContent>
