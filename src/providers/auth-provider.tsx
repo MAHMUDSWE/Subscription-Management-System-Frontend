@@ -17,7 +17,7 @@ interface User {
 interface AuthContextType {
   user: User | null
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
   signOut: () => void
 }
 
@@ -43,8 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     navigate('/')
   }
 
-  const signUp = async (email: string, password: string) => {
-    await api.register({ email, password })
+  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+    await api.register({ email, password, firstName, lastName })
     navigate('/login')
   }
 
