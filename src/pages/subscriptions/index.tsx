@@ -64,7 +64,7 @@ export default function SubscriptionsPage() {
                                     End Date: {new Date(subscription.endDate).toLocaleDateString()}
                                 </p>
                                 <p className="font-medium">
-                                    Amount: ${subscription.amount.toFixed(2)}
+                                    Amount: ${Number(subscription?.amount || 0).toFixed(2)}
                                 </p>
                             </div>
                         </CardContent>
