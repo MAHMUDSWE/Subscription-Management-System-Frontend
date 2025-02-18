@@ -1,0 +1,96 @@
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { useAuth } from '@/providers/auth-provider'
+import { useQuery } from '@tanstack/react-query'
+import { PlusIcon } from 'lucide-react'
+import { useState } from 'react'
+import { CreateOrganizationForm } from './create-organization-form'
+
+export type Organization = {
+  id: string
+  name: string
+  type: 'school' | 'coaching' | 'academy'
+  description: string
+  address: string
+  monthlyFee: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export default function OrganizationsPage() {
+  const { supabase } = useAuth()
+  const [open, setOpen] = useState(false)
+
+  const { data: organizations, isLoading } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .order('createdAt', { ascending: false })
+
+      if (error) throw error
+      return data as Organization[]
+    },
+  })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Organizations</h1>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add Organization
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Organization</DialogTitle>
+            </DialogHeader>
+            <CreateOrganizationForm onSuccess={() => setOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {organizations?.map((org) => (
+          <Card key={org.id}>
+            <CardHeader>
+              <CardTitle>{org.name}</CardTitle>
+              <CardDescription>{org.type}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500">{org.description}</p>
+                <p className="text-sm text-gray-500">{org.address}</p>
+                <p className="font-medium">
+                  Monthly Fee: ${org.monthlyFee.toFixed(2)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}

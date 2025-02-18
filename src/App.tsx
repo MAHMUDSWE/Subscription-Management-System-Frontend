@@ -1,11 +1,13 @@
-import { Routes, Route } from 'react-router-dom'
-import { Layout } from '@/components/layout'
-import { AuthProvider } from '@/providers/auth-provider'
-import { ProtectedRoute } from '@/components/protected-route'
 import { AuthRoute } from '@/components/auth-route'
+import { Layout } from '@/components/layout'
+import { ProtectedRoute } from '@/components/protected-route'
 import LoginPage from '@/pages/auth/login'
 import RegisterPage from '@/pages/auth/register'
 import DashboardPage from '@/pages/dashboard'
+import OrganizationsPage from '@/pages/organizations'
+import SubscriptionsPage from '@/pages/subscriptions'
+import { AuthProvider } from '@/providers/auth-provider'
+import { Route, Routes } from 'react-router-dom'
 
 export default function App() {
   return (
@@ -25,7 +27,7 @@ export default function App() {
             path="/organizations"
             element={
               <ProtectedRoute>
-                <div>Organizations Page</div>
+                <OrganizationsPage />
               </ProtectedRoute>
             }
           />
@@ -33,7 +35,7 @@ export default function App() {
             path="/subscriptions"
             element={
               <ProtectedRoute>
-                <div>Subscriptions Page</div>
+                <SubscriptionsPage />
               </ProtectedRoute>
             }
           />
