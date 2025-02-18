@@ -1,19 +1,24 @@
+import * as api from '@/lib/api'
 import {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
   useState,
-  ReactNode,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js'
+
+interface User {
+  id: string
+  email: string
+  role: string
+}
 
 interface AuthContextType {
-  supabase: SupabaseClient
   user: User | null
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
-  signOut: () => Promise<void>
+  signOut: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,53 +26,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(null)
-  const [supabase] = useState(() =>
-    createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    )
-  )
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    const token = localStorage.getItem('token')
+    if (token) {
+      const userData = JSON.parse(localStorage.getItem('user') || 'null')
+      setUser(userData)
+    }
+  }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    const { access_token, user } = await api.login({ email, password })
+    localStorage.setItem('token', access_token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setUser(user)
     navigate('/')
   }
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) throw error
+    await api.register({ email, password })
     navigate('/login')
   }
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+  const signOut = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
     navigate('/login')
   }
 
   return (
-    <AuthContext.Provider value={{ supabase, user, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   )

@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useAuth } from '@/providers/auth-provider'
+import * as api from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -32,20 +32,11 @@ export type Organization = {
 }
 
 export default function OrganizationsPage() {
-  const { supabase } = useAuth()
   const [open, setOpen] = useState(false)
 
   const { data: organizations, isLoading } = useQuery({
     queryKey: ['organizations'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .order('createdAt', { ascending: false })
-
-      if (error) throw error
-      return data as Organization[]
-    },
+    queryFn: api.getOrganizations,
   })
 
   if (isLoading) {
@@ -73,7 +64,7 @@ export default function OrganizationsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {organizations?.map((org) => (
+        {organizations?.map((org: any) => (
           <Card key={org.id}>
             <CardHeader>
               <CardTitle>{org.name}</CardTitle>

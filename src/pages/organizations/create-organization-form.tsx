@@ -16,7 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { useAuth } from '@/providers/auth-provider'
+import * as api from '@/lib/api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -39,7 +39,6 @@ interface CreateOrganizationFormProps {
 }
 
 export function CreateOrganizationForm({ onSuccess }: CreateOrganizationFormProps) {
-    const { supabase, user } = useAuth()
     const { toast } = useToast()
     const queryClient = useQueryClient()
 
@@ -56,16 +55,10 @@ export function CreateOrganizationForm({ onSuccess }: CreateOrganizationFormProp
 
     async function onSubmit(data: OrganizationValues) {
         try {
-            const { error } = await supabase.from('organizations').insert({
-                name: data.name,
-                type: data.type,
-                description: data.description,
-                address: data.address,
+            await api.createOrganization({
+                ...data,
                 monthlyFee: Number(data.monthlyFee),
-                ownerId: user?.id,
             })
-
-            if (error) throw error
 
             toast({
                 title: 'Success',
