@@ -49,7 +49,25 @@ export default function OrganizationsPage() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-6 w-2/3 bg-gray-200 rounded"></div>
+              <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="h-4 w-full bg-gray-200 rounded"></div>
+                <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
   return (
