@@ -18,12 +18,12 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import * as api from '@/lib/api'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 
 const subscriptionSchema = z.object({
-    organizationId: z.string().min(1, 'Organization is required'),
+    organizationId: z.string().min(1, 'Please select an organization'),
     amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: 'Amount must be a positive number',
     }),
@@ -33,12 +33,16 @@ type SubscriptionValues = z.infer<typeof subscriptionSchema>
 
 interface CreateSubscriptionFormProps {
     onSuccess: () => void
-    organizations: { id: string; name: string }[]
 }
 
-export function CreateSubscriptionForm({ onSuccess, organizations }: CreateSubscriptionFormProps) {
+export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProps) {
     const { toast } = useToast()
     const queryClient = useQueryClient()
+
+    const { data: organizations } = useQuery({
+        queryKey: ['organizations'],
+        queryFn: api.getOrganizations,
+    })
 
     const form = useForm<SubscriptionValues>({
         resolver: zodResolver(subscriptionSchema),
@@ -87,9 +91,9 @@ export function CreateSubscriptionForm({ onSuccess, organizations }: CreateSubsc
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {organizations.map((org) => (
+                                    {organizations?.map((org: any) => (
                                         <SelectItem key={org.id} value={org.id}>
-                                            {org.name}
+                                            {org.name} - ${org.monthlyFee}/month
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -106,7 +110,12 @@ export function CreateSubscriptionForm({ onSuccess, organizations }: CreateSubsc
                         <FormItem>
                             <FormLabel>Amount</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="Enter amount" step="0.01" {...field} />
+                                <Input
+                                    type="number"
+                                    placeholder="Enter subscription amount"
+                                    step="0.01"
+                                    {...field}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

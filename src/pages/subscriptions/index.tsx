@@ -40,11 +40,6 @@ export default function SubscriptionsPage() {
         queryFn: api.getSubscriptions,
     })
 
-    const { data: organizations } = useQuery({
-        queryKey: ['organizations'],
-        queryFn: api.getOrganizations,
-    })
-
     async function handleSuccess() {
         toast({ title: 'Success', description: 'Subscription created successfully.' })
         queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
@@ -52,7 +47,25 @@ export default function SubscriptionsPage() {
     }
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                        <CardHeader>
+                            <div className="h-6 w-2/3 bg-gray-200 rounded"></div>
+                            <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-2">
+                                <div className="h-4 w-full bg-gray-200 rounded"></div>
+                                <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                                <div className="h-4 w-1/3 bg-gray-200 rounded"></div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        )
     }
 
     return (
@@ -70,8 +83,7 @@ export default function SubscriptionsPage() {
                         <DialogHeader>
                             <DialogTitle>Create Subscription</DialogTitle>
                         </DialogHeader>
-                        <CreateSubscriptionForm onSuccess={() => handleSuccess()}
-                            organizations={organizations || []} />
+                        <CreateSubscriptionForm onSuccess={() => handleSuccess()} />
                     </DialogContent>
                 </Dialog>
             </div>
