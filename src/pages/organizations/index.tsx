@@ -13,8 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { useToast } from '@/hooks/use-toast'
 import * as api from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { CreateOrganizationForm } from './create-organization-form'
@@ -32,12 +33,20 @@ export type Organization = {
 }
 
 export default function OrganizationsPage() {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
   const { data: organizations, isLoading } = useQuery({
     queryKey: ['organizations'],
     queryFn: api.getOrganizations,
   })
+
+  async function handleSuccess() {
+    toast({ title: 'Success', description: 'Subscription created successfully.' })
+    queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+    setOpen(false)
+  }
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -58,7 +67,7 @@ export default function OrganizationsPage() {
             <DialogHeader>
               <DialogTitle>Create Organization</DialogTitle>
             </DialogHeader>
-            <CreateOrganizationForm onSuccess={() => setOpen(false)} />
+            <CreateOrganizationForm onSuccess={() => handleSuccess()} />
           </DialogContent>
         </Dialog>
       </div>
