@@ -1,3 +1,4 @@
+import { Organization } from '@/pages/organizations'
 import axios from 'axios'
 
 const api = axios.create({
@@ -22,6 +23,8 @@ export const createOrganization = (data: {
     address: string
     monthlyFee: number
 }) => api.post('/organizations', data).then((res) => res.data)
+
+export const updateOrganization = (data: Organization) => api.put(`/organizations/${data.id}`, data).then((res) => res.data)
 
 // Subscriptions
 export const getSubscriptions = () => api.get('/subscriptions').then((res) => res.data)

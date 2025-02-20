@@ -19,6 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { CreateOrganizationForm } from './create-organization-form'
+import EditOrganization from './edit-organization'
 
 export type Organization = {
   id: string
@@ -91,7 +92,7 @@ export default function OrganizationsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {organizations?.map((org: any) => (
+        {organizations?.map((org: Organization) => (
           <Card key={org.id}>
             <CardHeader>
               <CardTitle>{org.name}</CardTitle>
@@ -104,6 +105,7 @@ export default function OrganizationsPage() {
                 <p className="font-medium">
                   Monthly Fee: ${Number(org?.monthlyFee || 0).toFixed(2)}
                 </p>
+                <EditOrganization organization={org} />
               </div>
             </CardContent>
           </Card>
