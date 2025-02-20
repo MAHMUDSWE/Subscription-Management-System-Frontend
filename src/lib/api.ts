@@ -24,7 +24,11 @@ export const createOrganization = (data: {
     monthlyFee: number
 }) => api.post('/organizations', data).then((res) => res.data)
 
-export const updateOrganization = (data: Organization) => api.put(`/organizations/${data.id}`, data).then((res) => res.data)
+export const updateOrganization = async (data: Organization) => {
+    const { id, ...body } = data
+    const res = await api.put(`/organizations/${id}`, body)
+    return res.data
+}
 
 // Subscriptions
 export const getSubscriptions = () => api.get('/subscriptions').then((res) => res.data)
