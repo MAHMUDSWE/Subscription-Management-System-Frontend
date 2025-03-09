@@ -3,6 +3,7 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
@@ -13,6 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { CreateSubscriptionForm } from './create-subscription-form'
+import { SubscriptionActions } from './subscription-actions'
 
 export type Subscription = {
     id: string
@@ -110,6 +112,9 @@ export default function SubscriptionsPage() {
                                 </p>
                             </div>
                         </CardContent>
+                        <CardFooter className="flex justify-end">
+                            <SubscriptionActions subscription={subscription} />
+                        </CardFooter>
                     </Card>
                 ))}
             </div>

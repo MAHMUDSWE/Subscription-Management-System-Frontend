@@ -36,6 +36,20 @@ export const createSubscription = (data: {
     organizationId: string
     amount: number
 }) => api.post('/subscriptions', data).then((res) => res.data)
+export const cancelSubscription = (id: string) =>
+    api.post(`/subscriptions/${id}/cancel`).then((res) => res.data)
+export const renewSubscription = (id: string) =>
+    api.post(`/subscriptions/${id}/renew`).then((res) => res.data)
+
+// Payments
+export const createPayment = (data: {
+    subscriptionId: string
+    amount: number
+    method: 'stripe' | 'bkash'
+}) => api.post('/payments', data).then((res) => res.data)
+export const getPayments = () => api.get('/payments').then((res) => res.data)
+export const getPaymentsBySubscription = (subscriptionId: string) =>
+    api.get(`/payments/subscription/${subscriptionId}`).then((res) => res.data)
 
 // Auth
 export const login = (data: { email: string; password: string }) =>
