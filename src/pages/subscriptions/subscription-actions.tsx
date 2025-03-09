@@ -18,6 +18,8 @@ import * as api from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Subscription } from './index'
+import { PaymentDialog } from './payment-dialog'
+import { PaymentHistory } from './payment-history'
 
 interface SubscriptionActionsProps {
     subscription: Subscription
@@ -25,6 +27,8 @@ interface SubscriptionActionsProps {
 
 export function SubscriptionActions({ subscription }: SubscriptionActionsProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
+    const [isPaymentHistoryOpen, setIsPaymentHistoryOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
     const queryClient = useQueryClient()
@@ -80,16 +84,23 @@ export function SubscriptionActions({ subscription }: SubscriptionActionsProps) 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     {subscription.status === 'active' && (
-                        <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
-                            Cancel Subscription
-                        </DropdownMenuItem>
+                        <>
+                            <DropdownMenuItem onClick={() => setIsPaymentDialogOpen(true)}>
+                                Process Payment
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
+                                Cancel Subscription
+                            </DropdownMenuItem>
+                        </>
                     )}
                     {(subscription.status === 'cancelled' || subscription.status === 'expired') && (
                         <DropdownMenuItem onClick={handleRenew}>
                             Renew Subscription
                         </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem>View Payments</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsPaymentHistoryOpen(true)}>
+                        View Payments
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -119,6 +130,18 @@ export function SubscriptionActions({ subscription }: SubscriptionActionsProps) 
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <PaymentDialog
+                subscription={subscription}
+                open={isPaymentDialogOpen}
+                onOpenChange={setIsPaymentDialogOpen}
+            />
+
+            <PaymentHistory
+                subscription={subscription}
+                open={isPaymentHistoryOpen}
+                onOpenChange={setIsPaymentHistoryOpen}
+            />
         </>
     )
 }
