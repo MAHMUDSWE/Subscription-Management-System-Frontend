@@ -30,6 +30,8 @@ export type Payment = {
     type: string
     status: string
     subscription: Subscription
+    createdAt: string
+    updatedAt: string
 }
 
 export function PaymentHistory({ subscription, open, onOpenChange }: PaymentHistoryProps) {
