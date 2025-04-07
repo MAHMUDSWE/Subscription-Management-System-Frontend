@@ -34,7 +34,15 @@ export type Subscription = {
 export default function SubscriptionsPage() {
     const [open, setOpen] = useState(false)
 
-    const { data, isLoading } = useQuery<{ items: Subscription[] }>({
+    const { data, isLoading } = useQuery<{
+        items: Subscription[],
+        meta: {
+            total: number
+            page: number
+            lastPage: number
+            perPage: number
+        }
+    }>({
         queryKey: ['subscriptions'],
         queryFn: api.getSubscriptions,
     })
