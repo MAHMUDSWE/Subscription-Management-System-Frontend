@@ -8,9 +8,8 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
 import * as api from '@/lib/api'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { CreateSubscriptionForm } from './create-subscription-form'
@@ -33,8 +32,6 @@ export type Subscription = {
 }
 
 export default function SubscriptionsPage() {
-    const { toast } = useToast()
-    const queryClient = useQueryClient()
     const [open, setOpen] = useState(false)
 
     const { data, isLoading } = useQuery<{ items: Subscription[] }>({
@@ -45,8 +42,6 @@ export default function SubscriptionsPage() {
     const subscriptions = data?.items || []
 
     async function handleSuccess() {
-        toast({ title: 'Success', description: 'Subscription created successfully.' })
-        queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
         setOpen(false)
     }
 

@@ -18,7 +18,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import * as api from '@/lib/api'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 
@@ -44,6 +45,25 @@ export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProp
         queryFn: api.getOrganizations,
     })
 
+    const { mutate, isPending } = useMutation({
+        mutationFn: api.createSubscription,
+        onSuccess: () => {
+            toast({
+                title: 'Success',
+                description: 'Subscription created successfully.',
+            })
+            queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+            onSuccess()
+        },
+        onError: (error) => {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Failed to create subscription',
+            })
+        }
+    })
+
     const form = useForm<SubscriptionValues>({
         resolver: zodResolver(subscriptionSchema),
         defaultValues: {
@@ -53,26 +73,11 @@ export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProp
     })
 
     async function onSubmit(data: SubscriptionValues) {
-        try {
-            await api.createSubscription({
-                ...data,
-                amount: Number(data.amount),
-            })
-
-            toast({
-                title: 'Success',
-                description: 'Subscription created successfully.',
-            })
-
-            queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
-            onSuccess()
-        } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to create subscription',
-            })
+        const subscriptionData = {
+            ...data,
+            amount: parseFloat(data.amount),
         }
+        mutate(subscriptionData)
     }
 
     return (
@@ -123,7 +128,7 @@ export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProp
                 />
 
                 <Button type="submit" className="w-full">
-                    Create Subscription
+                    {isPending ? <Loader2 className="animate-spin" /> : 'Create Subscription'}
                 </Button>
             </form>
         </Form>
