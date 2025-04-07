@@ -15,6 +15,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import { useDebounce } from '@/hooks/useDebounce'
+import { usePaginationParams } from '@/hooks/usePaginationParams'
 import * as api from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
@@ -40,8 +42,9 @@ export type Subscription = {
 
 export default function SubscriptionsPage() {
     const [open, setOpen] = useState(false)
-    const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
+    const { page, limit, setPage, setLimit } = usePaginationParams()
+    const debouncedPage = useDebounce(page, 300)
+    const debouncedLimit = useDebounce(limit, 300)
 
     const { data, isLoading } = useQuery<{
         items: Subscription[]
@@ -52,8 +55,8 @@ export default function SubscriptionsPage() {
             perPage: number
         }
     }>({
-        queryKey: ['subscriptions', page, limit],
-        queryFn: () => api.getSubscriptions(page, limit),
+        queryKey: ['subscriptions', debouncedPage, debouncedLimit],
+        queryFn: () => api.getSubscriptions(debouncedPage, debouncedLimit),
     })
 
     const subscriptions = data?.items || []
