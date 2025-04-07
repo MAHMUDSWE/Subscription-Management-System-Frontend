@@ -17,20 +17,22 @@ import { Subscription } from '../subscriptions'
 import { Payment } from '../subscriptions/payment-history'
 
 export default function DashboardPage() {
-  const { data: subscriptions } = useQuery({
+  const { data: subscriptionData } = useQuery<{ items: Subscription[] }>({
     queryKey: ['subscriptions'],
     queryFn: api.getSubscriptions,
   })
+  const subscriptions = subscriptionData?.items || []
 
   const { data: organizations } = useQuery({
     queryKey: ['organizations'],
     queryFn: api.getOrganizations,
   })
 
-  const { data: payments } = useQuery({
+  const { data: paymentsData } = useQuery<{ items: Payment[] }>({
     queryKey: ['payments'],
     queryFn: api.getPayments,
   })
+  const payments = paymentsData?.items || []
 
   // Calculate statistics
   const totalStudents = subscriptions?.length || 0

@@ -37,10 +37,12 @@ export default function SubscriptionsPage() {
     const queryClient = useQueryClient()
     const [open, setOpen] = useState(false)
 
-    const { data: subscriptions, isLoading } = useQuery({
+    const { data, isLoading } = useQuery<{ items: Subscription[] }>({
         queryKey: ['subscriptions'],
         queryFn: api.getSubscriptions,
     })
+
+    const subscriptions = data?.items || []
 
     async function handleSuccess() {
         toast({ title: 'Success', description: 'Subscription created successfully.' })

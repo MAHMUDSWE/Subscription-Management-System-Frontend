@@ -35,11 +35,13 @@ export type Payment = {
 }
 
 export function PaymentHistory({ subscription, open, onOpenChange }: PaymentHistoryProps) {
-    const { data: payments, isLoading } = useQuery<Payment[]>({
+    const { data, isLoading } = useQuery<{ items: Payment[] }>({
         queryKey: ['payments', subscription.id],
         queryFn: () => api.getPaymentsBySubscription(subscription.id),
         enabled: open,
     })
+
+    const payments = data?.items || []
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
