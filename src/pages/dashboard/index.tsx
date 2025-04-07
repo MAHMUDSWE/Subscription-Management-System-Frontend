@@ -19,7 +19,7 @@ import { Payment } from '../subscriptions/payment-history'
 export default function DashboardPage() {
   const { data: subscriptionData } = useQuery<{ items: Subscription[] }>({
     queryKey: ['subscriptions'],
-    queryFn: api.getSubscriptions,
+    queryFn: () => api.getSubscriptions(),
   })
   const subscriptions = subscriptionData?.items || []
 

@@ -31,7 +31,9 @@ export const updateOrganization = async (data: Organization) => {
 }
 
 // Subscriptions
-export const getSubscriptions = () => api.get('/subscriptions').then((res) => res.data)
+export const getSubscriptions = (page?: number, limit?: number) =>
+    api.get('/subscriptions', { params: { page, limit } }).then((res) => res.data)
+
 export const createSubscription = (data: {
     organizationId: string
     amount: number
