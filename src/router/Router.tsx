@@ -6,12 +6,11 @@ import OrganizationsPage from '@/pages/organizations'
 import SubscriptionsPage from '@/pages/subscriptions'
 import { useAuth } from '@/providers/auth-provider'
 import { AuthRoute } from '@/router/auth-route'
-import { ProtectedRoute } from '@/router/protected-route'
 import { Loader2 } from 'lucide-react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { ProtectedRoute } from './protected-route'
 
 export default function Router() {
-
     const { isAuthContextLoading } = useAuth()
 
     if (isAuthContextLoading) {
@@ -26,36 +25,19 @@ export default function Router() {
         <Routes>
             {/* Auth Routes */}
             <Route element={<AuthRoute />}>
-                <Route path="/" element={<LoginPage />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
             </Route>
 
             {/* Protected Routes */}
-            <Route
-                path="/dashboard"
-                element={
-                    <ProtectedRoute>
-                        <DashboardPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/organizations"
-                element={
-                    <ProtectedRoute>
-                        <OrganizationsPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/subscriptions"
-                element={
-                    <ProtectedRoute>
-                        <SubscriptionsPage />
-                    </ProtectedRoute>
-                }
-            />
+            <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/organizations" element={<OrganizationsPage />} />
+                <Route path="/subscriptions" element={<SubscriptionsPage />} />
+            </Route>
+
+            {/* Error Routes */}
             <Route path="*" element={<ErrorPage />} />
         </Routes>
     )

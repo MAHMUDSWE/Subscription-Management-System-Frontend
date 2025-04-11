@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 interface User {
   id: string
@@ -27,16 +27,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState<User | null>(null)
   const [isAuthContextLoading, setIsAuthContextLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      const userData = JSON.parse(localStorage.getItem('user') || 'null')
-      setUser(userData)
+    const initializeAuth = () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (token) {
+          const userData = JSON.parse(localStorage.getItem('user') || 'null')
+          setUser(userData)
+        }
+      } catch (error) {
+        // If there's any error reading from localStorage, clear the auth state
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setUser(null)
+      } finally {
+        setIsAuthContextLoading(false)
+      }
     }
-    setIsAuthContextLoading(false)
+
+    initializeAuth()
   }, [])
 
   const signIn = async (email: string, password: string) => {
@@ -44,7 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', access_token)
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
-    navigate('/')
+
+    // Navigate to the intended page or dashboard
+    const intendedPath = location.state?.from?.pathname || '/dashboard'
+    navigate(intendedPath, { replace: true })
   }
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
@@ -56,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setUser(null)
-    navigate('/login')
+    navigate('/', { replace: true })
   }
 
   return (

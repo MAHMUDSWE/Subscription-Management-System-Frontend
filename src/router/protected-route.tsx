@@ -1,14 +1,14 @@
 import { useAuth } from '@/providers/auth-provider'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Layout } from '../components/layout'
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+export function ProtectedRoute() {
   const { user } = useAuth()
   const location = useLocation()
 
   if (!user) {
-    return <Navigate to="/" state={{ from: location }} replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  return <Layout>{children}</Layout>
+  return <Layout><Outlet /></Layout>
 }
