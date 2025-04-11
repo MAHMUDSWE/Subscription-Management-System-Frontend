@@ -1,3 +1,4 @@
+import { toast } from '@/hooks/use-toast'
 import { Organization } from '@/pages/organizations'
 import axios from 'axios'
 
@@ -13,6 +14,29 @@ api.interceptors.request.use((config) => {
     }
     return config
 })
+
+// Add a response interceptor to handle 401 errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Clear local storage
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+
+            // Show toast message
+            toast({
+                variant: "destructive",
+                title: "Session Expired",
+                description: "Your session has expired. Please login again.",
+            })
+
+            // Redirect to login page
+            window.location.href = '/login'
+        }
+        return Promise.reject(error)
+    }
+)
 
 // Organizations
 export const getOrganizations = (page?: number, limit?: number) =>
