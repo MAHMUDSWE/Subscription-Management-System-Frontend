@@ -1,12 +1,13 @@
-import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/providers/auth-provider'
+import { Navigate, Outlet } from 'react-router-dom'
+import { Layout } from './layout'
 
-export function AuthRoute({ children }: { children: React.ReactNode }) {
+export function AuthRoute() {
   const { user } = useAuth()
 
   if (user) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/dashboard" replace />
   }
 
-  return <>{children}</>
+  return <Layout><Outlet /></Layout>
 }

@@ -1,14 +1,14 @@
-import { Fragment } from 'react'
-import { Link } from 'react-router-dom'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/providers/auth-provider'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { useAuth } from '@/providers/auth-provider'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Fragment } from 'react'
+import { Link } from 'react-router-dom'
 
 const navigation = [
-  { name: 'Dashboard', href: '/' },
+  { name: 'Dashboard', href: '/dashboard' },
   { name: 'Organizations', href: '/organizations' },
   { name: 'Subscriptions', href: '/subscriptions' },
 ]
@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <span className="text-xl font-bold text-primary">SMS</span>
                   </div>
                   <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                    {navigation.map((item) => (
+                    {user && navigation.map((item) => (
                       <Link
                         key={item.name}
                         to={item.href}
@@ -107,7 +107,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
             <Disclosure.Panel className="sm:hidden">
               <div className="space-y-1 pb-3 pt-2">
-                {navigation.map((item) => (
+                {user && navigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}

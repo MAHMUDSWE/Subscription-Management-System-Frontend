@@ -19,6 +19,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
   signOut: () => void
+  isAuthContextLoading: boolean
+  setIsAuthContextLoading: (loading: boolean) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -26,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(null)
+  const [isAuthContextLoading, setIsAuthContextLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -33,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = JSON.parse(localStorage.getItem('user') || 'null')
       setUser(userData)
     }
+    setIsAuthContextLoading(false)
   }, [])
 
   const signIn = async (email: string, password: string) => {
@@ -56,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut, isAuthContextLoading, setIsAuthContextLoading }}>
       {children}
     </AuthContext.Provider>
   )
