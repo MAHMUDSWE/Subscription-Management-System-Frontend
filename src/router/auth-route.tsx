@@ -1,6 +1,6 @@
 import { useAuth } from '@/providers/auth-provider'
 import { Navigate, Outlet } from 'react-router-dom'
-import { Layout } from './layout'
+import { Layout } from '../components/layout'
 
 export function AuthRoute() {
   const { user } = useAuth()
