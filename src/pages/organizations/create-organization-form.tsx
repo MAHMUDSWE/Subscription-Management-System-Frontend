@@ -18,7 +18,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import * as api from '@/lib/api'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 
@@ -53,27 +54,32 @@ export function CreateOrganizationForm({ onSuccess }: CreateOrganizationFormProp
         },
     })
 
-    async function onSubmit(data: OrganizationValues) {
-        try {
-            await api.createOrganization({
-                ...data,
-                monthlyFee: Number(data.monthlyFee),
-            })
-
+    const { mutate, isPending } = useMutation({
+        mutationFn: api.createOrganization,
+        onSuccess: () => {
             toast({
                 title: 'Success',
                 description: 'Organization created successfully.',
             })
-
             queryClient.invalidateQueries({ queryKey: ['organizations'] })
             onSuccess()
-        } catch (error) {
+        },
+        onError: (error) => {
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to create organization',
+                description:
+                    error instanceof Error ? error.message : 'Failed to create organization',
             })
+        },
+    })
+
+    async function onSubmit(data: OrganizationValues) {
+        const organizationData = {
+            ...data,
+            monthlyFee: parseFloat(data.monthlyFee),
         }
+        mutate(organizationData)
     }
 
     return (
@@ -164,7 +170,7 @@ export function CreateOrganizationForm({ onSuccess }: CreateOrganizationFormProp
                 />
 
                 <Button type="submit" className="w-full">
-                    Create Organization
+                    {isPending ? <Loader2 className='animate-spin' /> : 'Create Organization'}
                 </Button>
             </form>
         </Form>

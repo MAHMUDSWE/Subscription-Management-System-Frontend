@@ -23,10 +23,11 @@ export default function DashboardPage() {
   })
   const subscriptions = subscriptionData?.items || []
 
-  const { data: organizations } = useQuery({
+  const { data: organizationsData } = useQuery({
     queryKey: ['organizations'],
-    queryFn: api.getOrganizations,
+    queryFn: () => api.getOrganizations(),
   })
+  const organizations = organizationsData?.items || []
 
   const { data: paymentsData } = useQuery<{ items: Payment[] }>({
     queryKey: ['payments'],

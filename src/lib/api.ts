@@ -15,7 +15,8 @@ api.interceptors.request.use((config) => {
 })
 
 // Organizations
-export const getOrganizations = () => api.get('/organizations').then((res) => res.data)
+export const getOrganizations = (page?: number, limit?: number) =>
+    api.get('/organizations', { params: { page, limit } }).then((res) => res.data)
 export const createOrganization = (data: {
     name: string
     type: string

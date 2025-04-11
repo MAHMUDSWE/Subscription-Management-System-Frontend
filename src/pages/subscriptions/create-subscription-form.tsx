@@ -42,7 +42,7 @@ export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProp
 
     const { data: organizations } = useQuery({
         queryKey: ['organizations'],
-        queryFn: api.getOrganizations,
+        queryFn: () => api.getOrganizations(1, 100),
     })
 
     const { mutate, isPending } = useMutation({
