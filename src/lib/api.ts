@@ -19,21 +19,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            // Clear local storage
+        const isUnauthorized = error.response?.status === 401
+        const isLoginRequest = error.config?.url?.includes('/login')
+        const isOnLoginPage = window.location.pathname === '/login'
+
+        if (isUnauthorized && !isLoginRequest && !isOnLoginPage) {
+
             localStorage.removeItem('token')
             localStorage.removeItem('user')
 
-            // Show toast message
             toast({
-                variant: "destructive",
-                title: "Session Expired",
-                description: "Your session has expired. Please login again.",
+                variant: 'destructive',
+                title: 'Session Expired',
+                description: 'Your session has expired. Please login again.',
             })
 
-            // Redirect to login page
             window.location.href = '/login'
         }
+
         return Promise.reject(error)
     }
 )

@@ -1,9 +1,3 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { useAuth } from '@/providers/auth-provider'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -15,6 +9,12 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/providers/auth-provider'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
+import * as z from 'zod'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -48,7 +48,7 @@ export default function LoginPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to login',
+        description: error instanceof Error ? (error as any)?.response?.data?.message : 'Failed to login',
       })
     } finally {
       setLoading(false)
