@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '@/components/shared/paginated-response'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -22,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
+import { Organization } from '../organizations'
 
 const subscriptionSchema = z.object({
     organizationId: z.string().min(1, 'Please select an organization'),
@@ -40,10 +42,11 @@ export function CreateSubscriptionForm({ onSuccess }: CreateSubscriptionFormProp
     const { toast } = useToast()
     const queryClient = useQueryClient()
 
-    const { data: organizations } = useQuery({
+    const { data: organizationData } = useQuery<PaginatedResponse<Organization>>({
         queryKey: ['organizations'],
         queryFn: () => api.getOrganizations(1, 100),
     })
+    const organizations = organizationData?.items
 
     const { mutate, isPending } = useMutation({
         mutationFn: api.createSubscription,

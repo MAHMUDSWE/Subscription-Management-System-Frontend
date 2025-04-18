@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '@/components/shared/paginated-response'
 import { PaginationControls } from '@/components/shared/pagination-controls'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,15 +47,7 @@ export default function SubscriptionsPage() {
     const debouncedPage = useDebounce(page, 300)
     const debouncedLimit = useDebounce(limit, 300)
 
-    const { data, isLoading } = useQuery<{
-        items: Subscription[]
-        meta: {
-            total: number
-            page: number
-            lastPage: number
-            perPage: number
-        }
-    }>({
+    const { data, isLoading } = useQuery<PaginatedResponse<Subscription>>({
         queryKey: ['subscriptions', debouncedPage, debouncedLimit],
         queryFn: () => api.getSubscriptions(debouncedPage, debouncedLimit),
     })

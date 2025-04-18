@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '@/components/shared/paginated-response'
 import {
     Dialog,
     DialogContent,
@@ -35,7 +36,7 @@ export type Payment = {
 }
 
 export function PaymentHistory({ subscription, open, onOpenChange }: PaymentHistoryProps) {
-    const { data, isLoading } = useQuery<{ items: Payment[] }>({
+    const { data, isLoading } = useQuery<PaginatedResponse<Payment>>({
         queryKey: ['payments', subscription.id],
         queryFn: () => api.getPaymentsBySubscription(subscription.id),
         enabled: open,
