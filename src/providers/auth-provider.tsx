@@ -18,7 +18,7 @@ interface AuthContextType {
   user: User | null
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
-  signOut: () => void
+  signOut: () => Promise<void>
   isAuthContextLoading: boolean
   setIsAuthContextLoading: (loading: boolean) => void
 }
@@ -40,8 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userData)
         }
       } catch (error) {
-        // If there's any error reading from localStorage, clear the auth state
         localStorage.removeItem('token')
+        localStorage.removeItem('refresh_token')
         localStorage.removeItem('user')
         setUser(null)
       } finally {
@@ -53,12 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { access_token, user } = await api.login({ email, password })
+    const { access_token, refresh_token, user } = await api.login({ email, password })
     localStorage.setItem('token', access_token)
+    localStorage.setItem('refresh_token', refresh_token)
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
 
-    // Navigate to the intended page or dashboard
     const intendedPath = location.state?.from?.pathname || '/dashboard'
     navigate(intendedPath, { replace: true })
   }
@@ -68,11 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     navigate('/login')
   }
 
-  const signOut = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
-    navigate('/', { replace: true })
+  const signOut = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (!refreshToken) {
+        throw new Error('No refresh token found')
+      }
+      await api.logout({ refreshToken })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      localStorage.removeItem('token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+      setUser(null)
+      navigate('/', { replace: true })
+    }
   }
 
   return (
