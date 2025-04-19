@@ -1,4 +1,5 @@
 import * as api from '@/lib/api'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   ReactNode,
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const location = useLocation()
   const [user, setUser] = useState<User | null>(null)
   const [isAuthContextLoading, setIsAuthContextLoading] = useState(true)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const initializeAuth = () => {
@@ -82,6 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
       setUser(null)
+      queryClient.removeQueries();
+      queryClient.cancelQueries();
       navigate('/', { replace: true })
     }
   }
