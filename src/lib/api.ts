@@ -1,6 +1,6 @@
-import { toast } from '@/hooks/use-toast'
 import { Organization } from '@/pages/organizations'
 import axios from 'axios'
+import { getTokens, handleAuthError, setTokens } from './auth'
 
 const api = axios.create({
     baseURL: '/api',
@@ -17,14 +17,13 @@ const processQueue = (error: any, token: string | null = null) => {
             prom.resolve(token!)
         }
     })
-
     failedQueue = []
 }
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
+    const tokens = getTokens()
+    if (tokens?.accessToken) {
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`
     }
     return config
 })
@@ -34,23 +33,21 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
         const isUnauthorized = error.response?.status === 401
-        const isLoginRequest = originalRequest.url === '/login'
-        const isRefreshRequest = originalRequest.url === '/refresh'
-        const isOnLoginPage = window.location.pathname === '/login'
+        const isLoginRequest = originalRequest.url === '/auth/login'
+        const isRefreshRequest = originalRequest.url === '/auth/refresh'
 
-        if (isUnauthorized && !isLoginRequest && !isRefreshRequest && !isOnLoginPage) {
+        if (isUnauthorized && !isLoginRequest && !isRefreshRequest) {
             if (!isRefreshing) {
                 isRefreshing = true
 
                 try {
-                    const storedRefreshToken = localStorage.getItem('refresh_token')
+                    const tokens = getTokens()
                     const response = await axios.post('/api/auth/refresh', {
-                        refreshToken: storedRefreshToken,
+                        refreshToken: tokens?.refreshToken,
                     })
                     const { access_token, refresh_token } = response.data
 
-                    localStorage.setItem('token', access_token)
-                    localStorage.setItem('refresh_token', refresh_token)
+                    setTokens({ accessToken: access_token, refreshToken: refresh_token })
 
                     originalRequest.headers.Authorization = `Bearer ${access_token}`
                     processQueue(null, access_token)
@@ -58,16 +55,7 @@ api.interceptors.response.use(
                     return api(originalRequest)
                 } catch (refreshError) {
                     processQueue(refreshError, null)
-                    localStorage.removeItem('token')
-                    localStorage.removeItem('refresh_token')
-                    localStorage.removeItem('user')
-
-                    toast({
-                        variant: 'destructive',
-                        title: 'Session Expired',
-                        description: 'Your session has expired. Please login again.',
-                    })
-                    window.location.href = '/login'
+                    handleAuthError()
                     return Promise.reject(refreshError)
                 } finally {
                     isRefreshing = false
@@ -81,18 +69,30 @@ api.interceptors.response.use(
                     originalRequest.headers.Authorization = `Bearer ${token}`
                     return api(originalRequest)
                 })
-                .catch((err) => {
-                    return Promise.reject(err)
-                })
+                .catch((err) => Promise.reject(err))
         }
 
         return Promise.reject(error)
     }
 )
 
+// Auth
+export const login = (data: { email: string; password: string }) =>
+    api.post('/auth/login', data).then((res) => res.data)
+
+export const register = (data: { email: string; password: string; firstName: string; lastName: string }) =>
+    api.post('/users', data).then((res) => res.data)
+
+export const logout = (data: { refreshToken: string }) =>
+    api.post('/auth/logout', data).then((res) => res.data)
+
+export const refreshToken = (data: { refreshToken: string | null }) =>
+    api.post('/auth/refresh', data).then((res) => res.data)
+
 // Organizations
 export const getOrganizations = (page?: number, limit?: number) =>
     api.get('/organizations', { params: { page, limit } }).then((res) => res.data)
+
 export const createOrganization = (data: {
     name: string
     type: string
@@ -115,8 +115,10 @@ export const createSubscription = (data: {
     organizationId: string
     amount: number
 }) => api.post('/subscriptions', data).then((res) => res.data)
+
 export const cancelSubscription = (id: string) =>
     api.post(`/subscriptions/${id}/cancel`).then((res) => res.data)
+
 export const renewSubscription = (id: string) =>
     api.post(`/subscriptions/${id}/renew`).then((res) => res.data)
 
@@ -126,16 +128,8 @@ export const createPayment = (data: {
     amount: number
     method: 'stripe' | 'bkash'
 }) => api.post('/payments', data).then((res) => res.data)
+
 export const getPayments = () => api.get('/payments').then((res) => res.data)
+
 export const getPaymentsBySubscription = (subscriptionId: string) =>
     api.get(`/payments/subscription/${subscriptionId}`).then((res) => res.data)
-
-// Auth
-export const login = (data: { email: string; password: string }) =>
-    api.post('/auth/login', data).then((res) => res.data)
-export const register = (data: { email: string; password: string, firstName: string, lastName: string }) =>
-    api.post('/users', data).then((res) => res.data)
-export const logout = (data: { refreshToken: string }) => api.post('/auth/logout', data).then((res) => res.data)
-
-export const refreshToken = (data: { refreshToken: string | null }) =>
-    api.post('/auth/refresh', data).then((res) => res.data)

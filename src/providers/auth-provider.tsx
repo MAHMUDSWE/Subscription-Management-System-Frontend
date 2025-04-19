@@ -1,5 +1,5 @@
+import { useAuthManagement } from '@/hooks/useAuth'
 import * as api from '@/lib/api'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   ReactNode,
@@ -31,10 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const location = useLocation()
   const [user, setUser] = useState<User | null>(null)
   const [isAuthContextLoading, setIsAuthContextLoading] = useState(true)
-  const queryClient = useQueryClient()
+  const { setTokens, clearTokens, handleLogout } = useAuthManagement()
 
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const token = localStorage.getItem('token')
         if (token) {
@@ -42,9 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userData)
         }
       } catch (error) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('refresh_token')
-        localStorage.removeItem('user')
+        clearTokens()
         setUser(null)
       } finally {
         setIsAuthContextLoading(false)
@@ -52,12 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     initializeAuth()
-  }, [])
+  }, [clearTokens])
 
   const signIn = async (email: string, password: string) => {
     const { access_token, refresh_token, user } = await api.login({ email, password })
-    localStorage.setItem('token', access_token)
-    localStorage.setItem('refresh_token', refresh_token)
+    setTokens({ accessToken: access_token, refreshToken: refresh_token })
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
 
@@ -73,20 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       const refreshToken = localStorage.getItem('refresh_token')
-      if (!refreshToken) {
-        throw new Error('No refresh token found')
+      if (refreshToken) {
+        await api.logout({ refreshToken })
       }
-      await api.logout({ refreshToken })
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
-      localStorage.removeItem('token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('user')
+      handleLogout()
       setUser(null)
-      queryClient.removeQueries();
-      queryClient.cancelQueries();
-      navigate('/', { replace: true })
     }
   }
 
