@@ -19,20 +19,34 @@ const triggerAuthEvent = () => {
 
 // Token management
 export const getTokens = (): Tokens | null => {
-    const accessToken = localStorage.getItem('token')
+    const accessToken = localStorage.getItem('access_token')
     const refreshToken = localStorage.getItem('refresh_token')
     return accessToken && refreshToken ? { accessToken, refreshToken } : null
 }
 
+export const getUser = () => {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+}
+
 export const setTokens = (tokens: Tokens) => {
-    localStorage.setItem('token', tokens.accessToken)
+    localStorage.setItem('access_token', tokens.accessToken)
     localStorage.setItem('refresh_token', tokens.refreshToken)
 }
 
+export const setUser = (user: any) => {
+    localStorage.setItem('user', JSON.stringify(user))
+}
+
 export const clearTokens = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
+}
+
+export const handleAuthSuccess = (tokens: Tokens, user: any) => {
+    setTokens(tokens)
+    setUser(user)
 }
 
 export const handleAuthError = () => {

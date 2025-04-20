@@ -1,4 +1,4 @@
-import { clearTokens, getTokens, onAuthEvent, setTokens } from '@/lib/auth'
+import { clearTokens, getTokens, getUser, onAuthEvent, setTokens, setUser } from '@/lib/auth'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -28,7 +28,9 @@ export const useAuthManagement = () => {
 
     return {
         getTokens,
+        getUser,
         setTokens,
+        setUser,
         clearTokens,
         handleLogout
     }
