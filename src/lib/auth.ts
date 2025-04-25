@@ -2,7 +2,6 @@ import { toast } from '@/hooks/use-toast'
 
 interface Tokens {
     accessToken: string
-    refreshToken: string
 }
 
 // Auth event handlers
@@ -20,8 +19,7 @@ const triggerAuthEvent = () => {
 // Token management
 export const getTokens = (): Tokens | null => {
     const accessToken = localStorage.getItem('access_token')
-    const refreshToken = localStorage.getItem('refresh_token')
-    return accessToken && refreshToken ? { accessToken, refreshToken } : null
+    return accessToken ? { accessToken } : null
 }
 
 export const getUser = () => {
@@ -31,7 +29,6 @@ export const getUser = () => {
 
 export const setTokens = (tokens: Tokens) => {
     localStorage.setItem('access_token', tokens.accessToken)
-    localStorage.setItem('refresh_token', tokens.refreshToken)
 }
 
 export const setUser = (user: any) => {
@@ -40,7 +37,6 @@ export const setUser = (user: any) => {
 
 export const clearTokens = () => {
     localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
 }
 

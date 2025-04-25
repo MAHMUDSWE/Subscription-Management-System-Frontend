@@ -1,3 +1,4 @@
+import { toast } from '@/hooks/use-toast'
 import { useAuthManagement } from '@/hooks/useAuth'
 import * as api from '@/lib/api'
 import { getUser, handleAuthSuccess } from '@/lib/auth'
@@ -9,7 +10,6 @@ import {
   useState,
 } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-
 interface User {
   id: string
   email: string
@@ -55,8 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearTokens])
 
   const signIn = async (email: string, password: string) => {
-    const { access_token, refresh_token, user } = await api.login({ email, password })
-    handleAuthSuccess({ accessToken: access_token, refreshToken: refresh_token }, user)
+    const { access_token, user } = await api.login({ email, password })
+    handleAuthSuccess({ accessToken: access_token }, user)
     setUser(user)
 
     const intendedPath = location.state?.from?.pathname || '/dashboard'
@@ -70,17 +70,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      const tokens = getTokens()
-      const refreshToken = tokens?.refreshToken
-      if (refreshToken) {
-        await api.logout({ refreshToken })
-      }
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
+      await api.logout()
       handleLogout()
       setUser(null)
+      toast({
+        variant: 'default',
+        title: 'Logged Out',
+        description: 'You have been logged out successfully.',
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Logout Failed',
+        description: 'An error occurred while logging out. Please try again.',
+      })
     }
+
   }
 
   return (

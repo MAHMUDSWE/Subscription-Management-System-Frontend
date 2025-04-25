@@ -4,6 +4,7 @@ import { getTokens, handleAuthError, setTokens } from './auth'
 
 const api = axios.create({
     baseURL: '/api',
+    withCredentials: true,
 })
 
 let isRefreshing = false
@@ -41,13 +42,12 @@ api.interceptors.response.use(
                 isRefreshing = true
 
                 try {
-                    const tokens = getTokens()
                     const response = await axios.post('/api/auth/refresh', {
-                        refreshToken: tokens?.refreshToken,
-                    })
-                    const { access_token, refresh_token } = response.data
+                    }, { withCredentials: true }
+                    )
+                    const { access_token } = response.data
 
-                    setTokens({ accessToken: access_token, refreshToken: refresh_token })
+                    setTokens({ accessToken: access_token })
 
                     originalRequest.headers.Authorization = `Bearer ${access_token}`
                     processQueue(null, access_token)
@@ -83,8 +83,8 @@ export const login = (data: { email: string; password: string }) =>
 export const register = (data: { email: string; password: string; firstName: string; lastName: string }) =>
     api.post('/users', data).then((res) => res.data)
 
-export const logout = (data: { refreshToken: string }) =>
-    api.post('/auth/logout', data).then((res) => res.data)
+export const logout = () =>
+    api.post('/auth/logout').then((res) => res.data)
 
 export const refreshToken = (data: { refreshToken: string | null }) =>
     api.post('/auth/refresh', data).then((res) => res.data)
